@@ -1,8 +1,32 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "task.h"
+#include <fstream>
+#include <sstream>
 
+// Task class definition
+class Task {
+private:
+    std::string description;
+    bool isDone;
+
+public:
+    Task(std::string desc) : description(desc), isDone(false) {}
+
+    void markDone() {
+        isDone = true;
+    }
+
+    std::string getDescription() const {
+        return description;
+    }
+
+    bool getStatus() const {
+        return isDone;
+    }
+};
+
+// Display all tasks
 void displayTasks(const std::vector<Task>& tasks) {
     std::cout << "\n--- To-Do List ---\n";
     for (size_t i = 0; i < tasks.size(); ++i) {
@@ -11,15 +35,52 @@ void displayTasks(const std::vector<Task>& tasks) {
     }
 }
 
+// Load tasks from file
+void loadTasksFromFile(std::vector<Task>& tasks, const std::string& filename) {
+    std::ifstream inFile(filename);
+    if (!inFile) {
+        std::cout << "No existing task file found. Starting fresh.\n";
+        return;
+    }
+
+    std::string line;
+    while (std::getline(inFile, line)) {
+        std::istringstream iss(line);
+        std::string statusStr, desc;
+        if (std::getline(iss, statusStr, '|') && std::getline(iss, desc)) {
+            Task task(desc);
+            if (statusStr == "1") {
+                task.markDone();
+            }
+            tasks.push_back(task);
+        }
+    }
+
+    inFile.close();
+}
+
+// Save tasks to file
+void saveTasksToFile(const std::vector<Task>& tasks, const std::string& filename) {
+    std::ofstream outFile(filename);
+    for (const Task& task : tasks) {
+        outFile << (task.getStatus() ? "1" : "0") << "|" << task.getDescription() << "\n";
+    }
+    outFile.close();
+}
+
+// Main program loop
 int main() {
     std::vector<Task> tasks;
+    std::string filename = "tasks.txt";
+    loadTasksFromFile(tasks, filename);
+
     int choice;
     std::string input;
 
     while (true) {
         std::cout << "\n1. Add Task\n2. View Tasks\n3. Mark Task Done\n4. Exit\nChoose an option: ";
         std::cin >> choice;
-        std::cin.ignore(); // clear newline character from buffer
+        std::cin.ignore(); // clear newline
 
         if (choice == 1) {
             std::cout << "Enter task description: ";
@@ -38,7 +99,8 @@ int main() {
                 std::cout << "Invalid task number.\n";
             }
         } else if (choice == 4) {
-            std::cout << "Goodbye!\n";
+            saveTasksToFile(tasks, filename);
+            std::cout << "Tasks saved. Goodbye!\n";
             break;
         } else {
             std::cout << "Invalid choice.\n";

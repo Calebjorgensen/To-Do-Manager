@@ -1,0 +1,25 @@
+# Object files
+*.o
+
+# Compiled binary
+todo
+*.out
+*.exe
+
+# Build directories
+/build/
+/bin/
+/dist/
+
+# macOS system files
+.DS_Store
+
+# VS Code settings (optional, personal config)
+.vscode/
+
+# CLion or JetBrains IDEs
+.idea/
+cmake-build-*/
+
+# Backup files
+*~
